@@ -1,0 +1,423 @@
+
+<style>
+@import url('https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700&display=swap');
+*{box-sizing:border-box;margin:0;padding:0;}
+body,html{font-family:'Inter',sans-serif;}
+.app{background:#1a1a1a;min-height:100vh;display:flex;flex-direction:column;}
+.header{background:#FFD600;padding:20px 16px 16px;text-align:center;}
+.header h1{font-size:clamp(16px,4vw,26px);font-weight:700;color:#111;letter-spacing:.3px;}
+.header p{font-size:clamp(10px,2vw,13px);color:#555;margin-top:4px;line-height:1.5;}
+.nav{background:#222;border-bottom:2px solid #FFD600;display:flex;overflow-x:auto;scrollbar-width:none;}
+.nav::-webkit-scrollbar{display:none;}
+.nav-tab{flex-shrink:0;padding:12px 18px;font-size:13px;font-weight:600;color:#888;cursor:pointer;border-bottom:3px solid transparent;transition:all .15s;white-space:nowrap;font-family:'Inter',sans-serif;}
+.nav-tab:hover{color:#FFD600;}
+.nav-tab.active{color:#FFD600;border-bottom:3px solid #FFD600;background:#2a2a2a;}
+.body{flex:1;display:flex;justify-content:center;align-items:flex-start;padding:24px 12px;background:#1a1a1a;}
+.card{background:#252525;border-radius:12px;width:100%;max-width:520px;padding:24px;border:1px solid #333;}
+.panel{display:none;}
+.panel.active{display:block;}
+.panel-title{font-size:13px;font-weight:700;color:#FFD600;letter-spacing:1px;text-transform:uppercase;margin-bottom:12px;}
+.formula-box{background:#2e2e2e;border-left:3px solid #FFD600;border-radius:0 6px 6px 0;padding:10px 14px;font-family:'Courier New',monospace;font-size:13px;color:#FFD600;margin-bottom:20px;line-height:1.6;}
+label{display:block;font-size:12px;font-weight:500;color:#aaa;margin-bottom:5px;}
+input[type=number],input[type=text],select{width:100%;background:#2e2e2e;color:#fff;border:1px solid #3a3a3a;border-radius:6px;padding:10px 12px;font-size:14px;font-family:'Inter',sans-serif;outline:none;transition:border-color .15s;-webkit-appearance:none;appearance:none;}
+input:focus,select:focus{border-color:#FFD600;}
+select{cursor:pointer;}
+.field{margin-bottom:14px;}
+.field-row{display:grid;grid-template-columns:1fr 1fr;gap:12px;margin-bottom:14px;}
+.calc-btn{width:100%;background:#FFD600;color:#111;border:none;border-radius:8px;padding:13px;font-size:15px;font-weight:700;font-family:'Inter',sans-serif;cursor:pointer;letter-spacing:.3px;margin-top:4px;transition:opacity .15s;}
+.calc-btn:hover{opacity:.88;}
+.result-box{background:#1e1e00;border:1.5px solid #FFD600;border-radius:8px;padding:16px;margin-top:16px;display:none;}
+.result-title{font-size:11px;font-weight:700;color:#888;text-transform:uppercase;letter-spacing:.8px;margin-bottom:8px;}
+.result-main{font-size:32px;font-weight:700;color:#FFD600;font-family:'Courier New',monospace;margin-bottom:4px;}
+.result-sub{font-size:13px;color:#aaa;margin-bottom:4px;}
+.result-note{font-size:11px;color:#666;margin-top:10px;border-top:1px solid #2a2000;padding-top:10px;font-family:'Courier New',monospace;line-height:1.7;}
+.result-grid{display:grid;grid-template-columns:1fr 1fr;gap:10px;margin-top:12px;}
+.result-card{background:#252500;border:1px solid #3a3000;border-radius:6px;padding:10px 12px;}
+.result-card .rc-label{font-size:10px;color:#888;font-weight:600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:4px;}
+.result-card .rc-val{font-size:18px;font-weight:700;color:#FFD600;font-family:'Courier New',monospace;}
+.sep{height:1px;background:#333;margin:14px 0;}
+.ghost-btn{background:#2e2e2e;color:#FFD600;border:1px solid #3a3a3a;border-radius:6px;padding:8px 14px;font-size:12px;font-weight:600;font-family:'Inter',sans-serif;cursor:pointer;transition:all .15s;}
+.ghost-btn:hover{border-color:#FFD600;background:#333;}
+.btn-row{display:flex;gap:8px;margin-bottom:14px;flex-wrap:wrap;}
+.ev-row-wrap{background:#2a2a2a;border-radius:6px;padding:10px;margin-bottom:8px;border:1px solid #333;}
+.ev-row-label{font-size:10px;font-weight:700;color:#666;text-transform:uppercase;letter-spacing:.5px;margin-bottom:8px;}
+.word-card{background:#2a2a2a;border-radius:8px;padding:12px;margin-bottom:10px;border:1px solid #333;}
+.word-card-title{font-size:11px;font-weight:700;color:#FFD600;text-transform:uppercase;letter-spacing:.5px;margin-bottom:10px;}
+.warn{color:#f0a500;font-size:12px;margin-top:6px;}
+@media(max-width:420px){
+  .field-row{grid-template-columns:1fr;}
+  .result-grid{grid-template-columns:1fr;}
+  .nav-tab{padding:10px 12px;font-size:12px;}
+  .card{padding:16px;}
+  .result-main{font-size:24px;}
+}
+</style>
+
+<div class="app">
+  <h2 class="sr-only">Probability Calculator for IT covering basic probability, addition, multiplication, complement, conditional, total probability, naive bayes, and binomial distribution with expected value, variance, and standard deviation.</h2>
+
+  <div class="header">
+    <h1>Probability Calculator for IT</h1>
+    <p>Basic · Addition · Multiplication · Complement · Conditional · Total · Bayes' · Binomial</p>
+  </div>
+
+  <div class="nav">
+    <div class="nav-tab active" onclick="switchTab('basic',this)">Basic</div>
+    <div class="nav-tab" onclick="switchTab('addition',this)">Addition</div>
+    <div class="nav-tab" onclick="switchTab('multiplication',this)">Multiplication</div>
+    <div class="nav-tab" onclick="switchTab('complement',this)">Complement</div>
+    <div class="nav-tab" onclick="switchTab('conditional',this)">Conditional</div>
+    <div class="nav-tab" onclick="switchTab('total',this)">Total Prob.</div>
+    <div class="nav-tab" onclick="switchTab('bayes',this)">Bayes'</div>
+    <div class="nav-tab" onclick="switchTab('binomial',this)">Binomial</div>
+    <div class="nav-tab" onclick="switchTab('expected',this)">E(X)</div>
+  </div>
+
+  <div class="body">
+    <div class="card">
+
+      <!-- BASIC -->
+      <div class="panel active" id="panel-basic">
+        <div class="panel-title">Basic Probability</div>
+        <div class="formula-box">P(A) = Favorable Outcomes / Total Outcomes</div>
+        <div class="field-row">
+          <div class="field"><label>Favorable Outcomes</label><input type="number" id="b-fav" value="2" min="0"></div>
+          <div class="field"><label>Total Outcomes</label><input type="number" id="b-tot" value="8" min="1"></div>
+        </div>
+        <button class="calc-btn" onclick="calcBasic()">Calculate</button>
+        <div class="result-box" id="res-basic">
+          <div class="result-title">P(A)</div>
+          <div class="result-main" id="rv-basic"></div>
+          <div class="result-sub" id="rp-basic"></div>
+          <div class="result-note" id="rn-basic"></div>
+        </div>
+      </div>
+
+      <!-- ADDITION -->
+      <div class="panel" id="panel-addition">
+        <div class="panel-title">Addition Rule</div>
+        <div class="formula-box" id="add-formula">P(A or B) = P(A) + P(B) − P(A and B)</div>
+        <div class="field">
+          <label>Are events mutually exclusive?</label>
+          <select id="add-exclusive" onchange="toggleAddPAB()">
+            <option value="no">No — they can happen together</option>
+            <option value="yes">Yes — mutually exclusive</option>
+          </select>
+        </div>
+        <div class="field-row">
+          <div class="field"><label>P(A)</label><input type="number" id="a-pa" value="0.1" min="0" max="1" step="0.01"></div>
+          <div class="field"><label>P(B)</label><input type="number" id="a-pb" value="0.05" min="0" max="1" step="0.01"></div>
+        </div>
+        <div class="field" id="add-pab-field">
+          <label>P(A and B)</label>
+          <input type="number" id="a-pab" value="0.01" min="0" max="1" step="0.01">
+        </div>
+        <button class="calc-btn" onclick="calcAddition()">Calculate</button>
+        <div class="result-box" id="res-addition">
+          <div class="result-title">P(A or B)</div>
+          <div class="result-main" id="rv-addition"></div>
+          <div class="result-sub" id="rp-addition"></div>
+          <div class="result-note" id="rn-addition"></div>
+        </div>
+      </div>
+
+      <!-- MULTIPLICATION -->
+      <div class="panel" id="panel-multiplication">
+        <div class="panel-title">Multiplication Rule</div>
+        <div class="formula-box">P(A and B) = P(A) × P(B)  [independent events]</div>
+        <div id="mult-inputs">
+          <div class="field-row">
+            <div class="field"><label>P(Event 1)</label><input type="number" class="mult-p" value="0.05" min="0" max="1" step="0.01"></div>
+            <div class="field"><label>P(Event 2)</label><input type="number" class="mult-p" value="0.05" min="0" max="1" step="0.01"></div>
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="ghost-btn" onclick="addMultRow()">+ Add Event</button>
+        </div>
+        <button class="calc-btn" onclick="calcMult()">Calculate</button>
+        <div class="result-box" id="res-multiplication">
+          <div class="result-title">P(all events)</div>
+          <div class="result-main" id="rv-multiplication"></div>
+          <div class="result-sub" id="rp-multiplication"></div>
+          <div class="result-note" id="rn-multiplication"></div>
+        </div>
+      </div>
+
+      <!-- COMPLEMENT -->
+      <div class="panel" id="panel-complement">
+        <div class="panel-title">Complement Rule</div>
+        <div class="formula-box">P(not A) = 1 − P(A)</div>
+        <div class="field"><label>P(A) — probability event occurs</label><input type="number" id="c-pa" value="0.95" min="0" max="1" step="0.01"></div>
+        <button class="calc-btn" onclick="calcComplement()">Calculate</button>
+        <div class="result-box" id="res-complement">
+          <div class="result-title">P(not A)</div>
+          <div class="result-main" id="rv-complement"></div>
+          <div class="result-sub" id="rp-complement"></div>
+          <div class="result-note" id="rn-complement"></div>
+        </div>
+      </div>
+
+      <!-- CONDITIONAL -->
+      <div class="panel" id="panel-conditional">
+        <div class="panel-title">Conditional / Joint Probability</div>
+        <div class="formula-box">P(A∩B) = P(A) × P(B|A)
+P(final) = P(A∩B) × P(C | A∩B)</div>
+        <div class="field"><label>P(A) — e.g. CPU overload</label><input type="number" id="cond-pa" value="0.4" min="0" max="1" step="0.01"></div>
+        <div class="field"><label>P(B|A) — e.g. memory overload given CPU overload</label><input type="number" id="cond-pba" value="0.7" min="0" max="1" step="0.01"></div>
+        <div class="field"><label>P(C | A∩B) — e.g. crash given both (set to 1 to skip)</label><input type="number" id="cond-pc" value="0.8" min="0" max="1" step="0.01"></div>
+        <button class="calc-btn" onclick="calcConditional()">Calculate</button>
+        <div class="result-box" id="res-conditional">
+          <div class="result-title">Overall Probability</div>
+          <div class="result-main" id="rv-conditional"></div>
+          <div class="result-sub" id="rp-conditional"></div>
+          <div class="result-note" id="rn-conditional"></div>
+        </div>
+      </div>
+
+      <!-- TOTAL PROBABILITY -->
+      <div class="panel" id="panel-total">
+        <div class="panel-title">Law of Total Probability</div>
+        <div class="formula-box">P(F) = Σ P(Bᵢ) × P(F | Bᵢ)</div>
+        <div id="total-rows">
+          <div class="ev-row-wrap">
+            <div class="ev-row-label">Source 1</div>
+            <div class="field-row">
+              <div class="field"><label>P(Source)</label><input type="number" class="tot-ps" value="0.5" min="0" max="1" step="0.01"></div>
+              <div class="field"><label>P(Fail | Source)</label><input type="number" class="tot-pf" value="0.2" min="0" max="1" step="0.01"></div>
+            </div>
+          </div>
+          <div class="ev-row-wrap">
+            <div class="ev-row-label">Source 2</div>
+            <div class="field-row">
+              <div class="field"><label>P(Source)</label><input type="number" class="tot-ps" value="0.3" min="0" max="1" step="0.01"></div>
+              <div class="field"><label>P(Fail | Source)</label><input type="number" class="tot-pf" value="0.5" min="0" max="1" step="0.01"></div>
+            </div>
+          </div>
+          <div class="ev-row-wrap">
+            <div class="ev-row-label">Source 3</div>
+            <div class="field-row">
+              <div class="field"><label>P(Source)</label><input type="number" class="tot-ps" value="0.2" min="0" max="1" step="0.01"></div>
+              <div class="field"><label>P(Fail | Source)</label><input type="number" class="tot-pf" value="0.4" min="0" max="1" step="0.01"></div>
+            </div>
+          </div>
+        </div>
+        <div class="btn-row"><button class="ghost-btn" onclick="addTotalRow()">+ Add Source</button></div>
+        <button class="calc-btn" onclick="calcTotal()">Calculate</button>
+        <div class="result-box" id="res-total">
+          <div class="result-title">P(Failure)</div>
+          <div class="result-main" id="rv-total"></div>
+          <div class="result-sub" id="rp-total"></div>
+          <div class="result-note" id="rn-total"></div>
+        </div>
+      </div>
+
+      <!-- BAYES -->
+      <div class="panel" id="panel-bayes">
+        <div class="panel-title">Bayes' Theorem — Spam Detector</div>
+        <div class="formula-box">P(Spam|words) ∝ P(Spam) × Π P(word|Spam)</div>
+        <div class="field"><label>P(Spam) — prior probability</label><input type="number" id="nb-pspam" value="0.4" min="0" max="1" step="0.01"></div>
+        <div class="sep"></div>
+        <div id="nb-words">
+          <div class="word-card"><div class="word-card-title">Word 1</div><div class="field"><label>Word</label><input type="text" class="nb-word" value="Free" style="font-family:'Inter',sans-serif"></div><div class="field-row"><div class="field"><label>P(word | Spam)</label><input type="number" class="nb-ps" value="0.8" min="0" max="1" step="0.01"></div><div class="field"><label>P(word | Not Spam)</label><input type="number" class="nb-pns" value="0.1" min="0" max="1" step="0.01"></div></div></div>
+          <div class="word-card"><div class="word-card-title">Word 2</div><div class="field"><label>Word</label><input type="text" class="nb-word" value="Offer" style="font-family:'Inter',sans-serif"></div><div class="field-row"><div class="field"><label>P(word | Spam)</label><input type="number" class="nb-ps" value="0.7" min="0" max="1" step="0.01"></div><div class="field"><label>P(word | Not Spam)</label><input type="number" class="nb-pns" value="0.2" min="0" max="1" step="0.01"></div></div></div>
+        </div>
+        <div class="btn-row"><button class="ghost-btn" onclick="addNbRow()">+ Add Word</button></div>
+        <button class="calc-btn" onclick="calcBayes()">Classify</button>
+        <div class="result-box" id="res-bayes">
+          <div class="result-title">Classification</div>
+          <div class="result-main" id="rv-bayes"></div>
+          <div class="result-sub" id="rp-bayes"></div>
+          <div class="result-note" id="rn-bayes"></div>
+        </div>
+      </div>
+
+      <!-- BINOMIAL -->
+      <div class="panel" id="panel-binomial">
+        <div class="panel-title">Binomial Distribution</div>
+        <div class="formula-box">P(X=k) = C(n,k) × pᵏ × (1−p)ⁿ⁻ᵏ</div>
+        <div class="field-row">
+          <div class="field"><label>n — total trials</label><input type="number" id="bin-n" value="10" min="0" step="1"></div>
+          <div class="field"><label>k — successes sought</label><input type="number" id="bin-k" value="2" min="0" step="1"></div>
+        </div>
+        <div class="field"><label>p — success probability per trial</label><input type="number" id="bin-p" value="0.05" min="0" max="1" step="0.01"></div>
+        <button class="calc-btn" onclick="calcBinomial()">Calculate</button>
+        <div class="result-box" id="res-binomial">
+          <div class="result-title">P(X = k)</div>
+          <div class="result-main" id="rv-binomial"></div>
+          <div class="result-sub" id="rp-binomial"></div>
+          <div class="result-note" id="rn-binomial"></div>
+        </div>
+      </div>
+
+      <!-- EXPECTED VALUE -->
+      <div class="panel" id="panel-expected">
+        <div class="panel-title">Expected Value, Variance & Std Dev</div>
+        <div class="formula-box">E(X)  = Σ [x · P(x)]
+E(X²) = Σ [x² · P(x)]
+Var(X) = E(X²) − [E(X)]²
+SD(X)  = √Var(X)</div>
+        <div id="ev-rows">
+          <div class="ev-row-wrap"><div class="ev-row-label">Outcome 1</div><div class="field-row"><div class="field"><label>X value</label><input type="number" class="ev-x" value="0" step="any"></div><div class="field"><label>P(X)</label><input type="number" class="ev-px" value="0.2" min="0" max="1" step="0.01"></div></div></div>
+          <div class="ev-row-wrap"><div class="ev-row-label">Outcome 2</div><div class="field-row"><div class="field"><label>X value</label><input type="number" class="ev-x" value="1" step="any"></div><div class="field"><label>P(X)</label><input type="number" class="ev-px" value="0.5" min="0" max="1" step="0.01"></div></div></div>
+          <div class="ev-row-wrap"><div class="ev-row-label">Outcome 3</div><div class="field-row"><div class="field"><label>X value</label><input type="number" class="ev-x" value="2" step="any"></div><div class="field"><label>P(X)</label><input type="number" class="ev-px" value="0.3" min="0" max="1" step="0.01"></div></div></div>
+        </div>
+        <div class="btn-row"><button class="ghost-btn" onclick="addEvRow()">+ Add Outcome</button></div>
+        <button class="calc-btn" onclick="calcEV()">Calculate</button>
+        <div class="result-box" id="res-expected">
+          <div class="result-grid">
+            <div class="result-card"><div class="rc-label">E(X)</div><div class="rc-val" id="rv-ex"></div></div>
+            <div class="result-card"><div class="rc-label">E(X²)</div><div class="rc-val" id="rv-ex2"></div></div>
+            <div class="result-card"><div class="rc-label">Population Variance</div><div class="rc-val" id="rv-var"></div></div>
+            <div class="result-card"><div class="rc-label">Standard Deviation</div><div class="rc-val" id="rv-sd"></div></div>
+          </div>
+          <div class="result-note" id="rn-expected"></div>
+        </div>
+      </div>
+
+    </div>
+  </div>
+</div>
+
+<script>
+function switchTab(id,el){
+  document.querySelectorAll('.nav-tab').forEach(t=>t.classList.remove('active'));
+  document.querySelectorAll('.panel').forEach(p=>p.classList.remove('active'));
+  el.classList.add('active');
+  document.getElementById('panel-'+id).classList.add('active');
+}
+function showResult(id,val,pct,note){
+  const box=document.getElementById('res-'+id);
+  box.style.display='block';
+  if(document.getElementById('rv-'+id)) document.getElementById('rv-'+id).innerHTML=val;
+  if(document.getElementById('rp-'+id)) document.getElementById('rp-'+id).textContent=pct;
+  if(document.getElementById('rn-'+id)) document.getElementById('rn-'+id).textContent=note;
+}
+function calcBasic(){
+  const fav=parseFloat(document.getElementById('b-fav').value)||0;
+  const tot=parseFloat(document.getElementById('b-tot').value)||1;
+  const p=fav/tot;
+  showResult('basic',p.toFixed(4),(p*100).toFixed(2)+'%',fav+' favorable ÷ '+tot+' total outcomes');
+}
+function toggleAddPAB(){
+  const ex=document.getElementById('add-exclusive').value;
+  document.getElementById('add-pab-field').style.display=ex==='yes'?'none':'block';
+  document.getElementById('add-formula').textContent=ex==='yes'?'P(A or B) = P(A) + P(B)':'P(A or B) = P(A) + P(B) − P(A and B)';
+}
+function calcAddition(){
+  const pa=parseFloat(document.getElementById('a-pa').value)||0;
+  const pb=parseFloat(document.getElementById('a-pb').value)||0;
+  const ex=document.getElementById('add-exclusive').value;
+  const pab=ex==='yes'?0:(parseFloat(document.getElementById('a-pab').value)||0);
+  const r=Math.min(pa+pb-pab,1);
+  const note=ex==='yes'?'Mutually exclusive: '+pa+' + '+pb+' = '+r.toFixed(4):'Not mutually exclusive: '+pa+' + '+pb+' − '+pab+' = '+r.toFixed(4);
+  showResult('addition',r.toFixed(4),(r*100).toFixed(2)+'%',note);
+}
+let multCount=2;
+function addMultRow(){
+  multCount++;
+  const row=document.createElement('div');
+  row.className='field-row';
+  row.style.marginBottom='14px';
+  row.innerHTML='<div class="field"><label>P(Event '+multCount+')</label><input type="number" class="mult-p" value="0.05" min="0" max="1" step="0.01"></div>';
+  document.getElementById('mult-inputs').appendChild(row);
+}
+function calcMult(){
+  const inputs=document.querySelectorAll('.mult-p');
+  let r=1;
+  inputs.forEach(i=>{r*=parseFloat(i.value)||0;});
+  showResult('multiplication',r.toFixed(6),(r*100).toFixed(4)+'%','Product of '+inputs.length+' independent event probabilities');
+}
+function calcComplement(){
+  const pa=parseFloat(document.getElementById('c-pa').value)||0;
+  const r=1-pa;
+  showResult('complement',r.toFixed(4),(r*100).toFixed(2)+'%','P(not A) = 1 − '+pa+' = '+r.toFixed(4));
+}
+function calcConditional(){
+  const pa=parseFloat(document.getElementById('cond-pa').value)||0;
+  const pba=parseFloat(document.getElementById('cond-pba').value)||0;
+  const pc=parseFloat(document.getElementById('cond-pc').value)||1;
+  const joint=pa*pba;
+  const final=joint*pc;
+  showResult('conditional',final.toFixed(4),(final*100).toFixed(2)+'%',
+    'Step 1: P(A)×P(B|A) = '+pa+' × '+pba+' = '+joint.toFixed(4)+'\nStep 2: '+joint.toFixed(4)+' × '+pc+' = '+final.toFixed(4));
+}
+let totCount=3;
+function addTotalRow(){
+  totCount++;
+  const div=document.createElement('div');
+  div.className='ev-row-wrap';
+  div.innerHTML='<div class="ev-row-label">Source '+totCount+'</div><div class="field-row"><div class="field"><label>P(Source)</label><input type="number" class="tot-ps" value="0.1" min="0" max="1" step="0.01"></div><div class="field"><label>P(Fail | Source)</label><input type="number" class="tot-pf" value="0.3" min="0" max="1" step="0.01"></div></div>';
+  document.getElementById('total-rows').appendChild(div);
+}
+function calcTotal(){
+  const ps=document.querySelectorAll('.tot-ps');
+  const pf=document.querySelectorAll('.tot-pf');
+  let r=0,sumP=0;
+  ps.forEach((s,i)=>{const pi=parseFloat(s.value)||0;const fi=parseFloat(pf[i].value)||0;r+=pi*fi;sumP+=pi;});
+  const warn=Math.abs(sumP-1)>0.01?'\n⚠ Source probs sum to '+sumP.toFixed(4)+', should be 1':'';
+  showResult('total',r.toFixed(4),(r*100).toFixed(2)+'%','Σ P(Bᵢ)×P(F|Bᵢ) across '+ps.length+' sources'+warn);
+}
+let nbCount=2;
+function addNbRow(){
+  nbCount++;
+  const div=document.createElement('div');
+  div.className='word-card';
+  div.innerHTML='<div class="word-card-title">Word '+nbCount+'</div><div class="field"><label>Word</label><input type="text" class="nb-word" value="Word" style="font-family:Inter,sans-serif"></div><div class="field-row"><div class="field"><label>P(word | Spam)</label><input type="number" class="nb-ps" value="0.5" min="0" max="1" step="0.01"></div><div class="field"><label>P(word | Not Spam)</label><input type="number" class="nb-pns" value="0.5" min="0" max="1" step="0.01"></div></div>';
+  document.getElementById('nb-words').appendChild(div);
+}
+function calcBayes(){
+  const pS=parseFloat(document.getElementById('nb-pspam').value)||0;
+  const pNS=1-pS;
+  const sps=document.querySelectorAll('.nb-ps');
+  const nps=document.querySelectorAll('.nb-pns');
+  let ss=pS,ns=pNS;
+  sps.forEach((s,i)=>{ss*=parseFloat(s.value)||0;ns*=parseFloat(nps[i].value)||0;});
+  const total=ss+ns;
+  const prob=total>0?ss/total:0;
+  const isSpam=prob>=0.5;
+  document.getElementById('res-bayes').style.display='block';
+  document.getElementById('rv-bayes').innerHTML='<span style="color:'+(isSpam?'#FFD600':'#6fcf97')+'">'+(isSpam?'⚠ SPAM':'✓ NOT SPAM')+'</span>';
+  document.getElementById('rp-bayes').textContent='Spam probability: '+(prob*100).toFixed(2)+'%';
+  document.getElementById('rn-bayes').textContent='Spam score: '+ss.toExponential(4)+'  |  Not Spam score: '+ns.toExponential(4);
+}
+function fact(n){return n<=1?1:n*fact(n-1);}
+function comb(n,k){return fact(n)/(fact(k)*fact(n-k));}
+function calcBinomial(){
+  const n=parseInt(document.getElementById('bin-n').value);
+  const k=parseInt(document.getElementById('bin-k').value);
+  const p=parseFloat(document.getElementById('bin-p').value);
+  if(k>n){showResult('binomial','Error','','k cannot exceed n');return;}
+  const c=comb(n,k);
+  const r=c*Math.pow(p,k)*Math.pow(1-p,n-k);
+  showResult('binomial',r.toFixed(6),(r*100).toFixed(4)+'%','C('+n+','+k+') = '+c+'  →  '+c+' × '+p+'^'+k+' × '+(1-p).toFixed(2)+'^'+(n-k));
+}
+let evCount=3;
+function addEvRow(){
+  evCount++;
+  const div=document.createElement('div');
+  div.className='ev-row-wrap';
+  div.innerHTML='<div class="ev-row-label">Outcome '+evCount+'</div><div class="field-row"><div class="field"><label>X value</label><input type="number" class="ev-x" value="0" step="any"></div><div class="field"><label>P(X)</label><input type="number" class="ev-px" value="0" min="0" max="1" step="0.01"></div></div>';
+  document.getElementById('ev-rows').appendChild(div);
+}
+function calcEV(){
+  const xs=document.querySelectorAll('.ev-x');
+  const ps=document.querySelectorAll('.ev-px');
+  let ex=0,ex2=0,sumP=0;
+  xs.forEach((x,i)=>{
+    const xi=parseFloat(x.value)||0;
+    const pi=parseFloat(ps[i].value)||0;
+    ex+=xi*pi;
+    ex2+=xi*xi*pi;
+    sumP+=pi;
+  });
+  const variance=ex2-ex*ex;
+  const sd=Math.sqrt(Math.max(0,variance));
+  document.getElementById('res-expected').style.display='block';
+  document.getElementById('rv-ex').textContent=ex.toFixed(4);
+  document.getElementById('rv-ex2').textContent=ex2.toFixed(4);
+  document.getElementById('rv-var').textContent=variance.toFixed(4);
+  document.getElementById('rv-sd').textContent=sd.toFixed(4);
+  const warn=Math.abs(sumP-1)>0.001?'⚠ P(X) values sum to '+sumP.toFixed(4)+' — should equal 1':'✓ Probabilities sum to 1';
+  document.getElementById('rn-expected').textContent=warn;
+}
+</script>
